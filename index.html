@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>快上车</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC" type="image/x-icon" />
+    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.26.1/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.prod.min.js"></script>
+    <!-- AntDesign -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ant-design-vue@2.2.8/dist/antd.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/ant-design-vue@2.2.8/dist/antd.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <script>
+        class BusComing {
+
+            constructor(userId, h5Id) {
+                this.userId = userId;
+                // the h5Id default userId
+                this.h5Id = h5Id ? h5Id : userId;
+            }
+
+            searchLines(param) {
+                let preset = {
+                    's': 'h5',
+                    'wxs': 'wx_app',
+                    'sign': '1',
+                    'h5RealData': '1',
+                    'v': '4.0.00',
+                    'src': 'weixinapp_cx',
+                    'ctm_mp': 'mp_wx',
+                    'vc': '1',
+                    'cityId': '040',             // not 020 in canton, so strange
+                    'favoriteGray': '0',
+                    'userId': this.userId,
+                    'h5Id': this.h5Id,
+                    'lat': '23.123603',          // latitude
+                    'lng': '113.384541',         // longitude
+                    'geo_lat': '23.123603',      // geo latitude: lat
+                    'geo_lng': '113.384541',     // geo longitude: lng
+                    'gpstype': 'wgs',
+                    'geo_type': 'wgs',
+                    'scene': '1006',
+                    'localCityId': '040',        // not 020 in canton, so strange
+                    'key': '28',
+                    'poiNum': '0',
+                };
+                // merge param
+                param = Object.assign(preset, param);
+                // parse param
+                param = Object.keys(param).map((k) => `${k}=${param[k]}`).join('&');
+                return `${location.origin}/search.php?${param}`;
+            }
+
+            getLineDetail(param) {
+                let preset = {
+                    's': 'h5',
+                    'wxs': 'wx_app',
+                    'sign': '1',
+                    'h5RealData': '1',
+                    'v': '4.0.00',               // version
+                    'src': 'weixinapp_cx',
+                    'ctm_mp': 'mp_wx',
+                    'vc': '1',
+                    'cityId': '040',             // not 020 in canton, so strange
+                    'favoriteGray': '0',
+                    'userId': this.userId,
+                    'h5Id': this.h5Id,
+                    'lat': '23.123603',          // latitude
+                    'lng': '113.384541',         // longitude
+                    'geo_lat': '23.123603',      // geo latitude: lat
+                    'geo_lng': '113.384541',     // geo longitude: lng
+                    'gpstype': 'wgs',
+                    'geo_type': 'wgs',
+                    'scene': '1001',
+                    'lineId': '020-00280-1',     // cityId-lineId-order(forward: 0/backward: 1)
+                    'targetOrder': '1',          // station order
+                    'special': '0',
+                    'specialOrder': '1',         // station order
+                    'specialType': 'undefined',
+                    'specialTargetOrder': '1',   // station order
+                    'stationId': '020-18462',    // bus station id
+                    'grey_city': '1',
+                    'localCityId': '040',        // not 020 in canton, so strange
+                    'permission': '0',
+                    'cryptoSign': 'd4f6d9ba4bd88dc8c8070de0aeb72e74',
+                };
+                // merge param
+                param = Object.assign(preset, param);
+                // parse param
+                param = Object.keys(param).map((k) => `${k}=${param[k]}`).join('&');
+                return `${location.origin}/line.php?${param}`;
+            }
+
+            getBusesDetail(param) {
+                let preset = {
+                    's': 'h5',
+                    'wxs': 'wx_app',
+                    'sign': '1',
+                    'h5RealData': '1',
+                    'v': '4.0.00',               // version
+                    'src': 'weixinapp_cx',
+                    'ctm_mp': 'mp_wx',
+                    'vc': '1',
+                    'cityId': '040',             // not 020 in canton, so strange
+                    'favoriteGray': '0',
+                    'userId': this.userId,
+                    'h5Id': this.h5Id,
+                    'lat': '23.123603',          // latitude
+                    'lng': '113.384541',         // longitude
+                    'geo_lat': '23.123603',      // geo latitude: lat
+                    'geo_lng': '113.384541',     // geo longitude: lng
+                    'gpstype': 'wgs',
+                    'geo_type': 'wgs',
+                    'scene': '1001',
+                    'lineId': '020-00280-1',     // cityId-lineId-order(forward: 0/backward: 1)
+                    'targetOrder': '1',
+                    'specialTargetOrder': '1',
+                    'specail': '0',
+                    'stationId': '020-4608',     // bus station id
+                    'specialType': 'undefined',
+                    'cshow': 'busDetail',
+                };
+                // merge param
+                param = Object.assign(preset, param);
+                // parse param
+                param = Object.keys(param).map((k) => `${k}=${param[k]}`).join('&');
+                return `${location.origin}/bus.php?${param}`;
+            }
+        }
+    </script>
+    <div id="container"></div>
+    <script>
+        let app = Vue.createApp({
+            setup() {
+                return {
+                    'stations': Vue.ref([]),
+                    'buses': Vue.ref([]),
+                    'order': Vue.ref(0),
+                    'targetOrder': Vue.ref(0),
+                    'lines': Vue.ref([]),
+                    'display': Vue.ref('lines'),
+                }
+            },
+            mounted() {
+                this.bus = new BusComing('okBHq0ETXAjgKH5HcIltsNaV3Lsk');
+
+            },
+            'methods': {
+                formatTravels(travels) {
+                    return travels.reduce((a, i) => this.formatTime(i.travelTime), '');
+                },
+                formatTime(time) {
+                    if(time < 60) {
+                        return `${time}秒`
+                    }
+                    time = Math.floor(time / 6) / 10;
+                    return `${time}分钟`;
+                },
+                formatDistance(distance) {
+                    if(distance < 1000) {
+                        return `${distance}米`
+                    }
+                    distance = Math.floor(distance / 100) / 10;
+                    return `${distance}公里`;
+                },
+                search(target) {
+                    axios({ 'url': this.bus.searchLines({'key': target}) }).then((response) => {
+                        // example **YGJK{}YGJK##
+                        const json = JSON.parse(response.data.substr(6).slice(0, -6));
+                        console.log(json['jsonr']['data']);
+                        this.lines = json['jsonr']['data']['result']['lines'];
+                        this.display = 'lines';
+                    });
+                },
+                setBusLine(line) {
+                    this.line = line;
+                    this.setLine({'lineId': line.lineId, 'targetOrder': 1, 'specialTargetOrder': 1});
+                    this.setBus({'lineId': line.lineId, 'targetOrder': 1, 'specialTargetOrder': 1});
+                    this.display = 'stations';
+                },
+                setLine(param = {}) {
+                    this.param = param;
+                    axios({ 'url': this.bus.getLineDetail(param) }).then((response) => {
+                        // example **YGJK{}YGJK##
+                        let json = JSON.parse(response.data.substr(6).slice(0, -6));
+                        // mode and key take from fetcher.encrypt.js in wechat mini app
+                        const encryptResult = json['jsonr']['data']['encryptResult'];
+                        const key = CryptoJS.enc.Utf8.parse("FF32AE65FBFD19414EAAFF6291A54B42");
+                        let string = CryptoJS.AES.decrypt(encryptResult, key, { 'mode': CryptoJS.mode.ECB });
+                        json = JSON.parse(string.toString(CryptoJS.enc.Utf8));
+                        console.log(json['stations']);
+                        const start = Object.assign(Object.assign({}, json['stations'][0]), {'sn': '等待', 'order': 0, 'specialOrder': 0});
+                        // min lat
+                        // json['stations'].map(s => s.lat - this.position.coords.latitude).reduce((m, i) => Math.min(m,i), 0);
+                        // min lng
+                        // json['stations'].map(s => s.lng - this.position.coords.longitude).reduce((m, i) => Math.min(m,i), 0);
+                        this.stations = [start, ...json['stations']];
+                    });
+                },
+                setBus(param = {}) {
+                    this.param = param;
+                    axios({ 'url': this.bus.getBusesDetail(param) }).then((response) => {
+                        // example **YGJK{}YGJK##
+                        const json = JSON.parse(response.data.substr(6).slice(0, -6));
+                        console.log(json['jsonr']['data']['buses']);
+                        this.buses = json['jsonr']['data']['buses'];
+                    });
+                },
+                reverse() {
+                    const direction = parseInt(this.param.lineId.substr(-1, 1));
+                    const lineId = this.param.lineId.slice(0, -1);
+                    this.param.lineId = `${lineId}${direction ^ 1}`;
+                    this.setLine(this.param);
+                },
+                setOrder(targetOrder) {
+                    // view target order start from 0
+                    this.targetOrder = targetOrder;
+                    // data target order start from 1
+                    this.setBus({'lineId': this.line.lineId, 'targetOrder': targetOrder, 'specialTargetOrder': targetOrder});
+                },
+                refresh() {
+                    this.setBus(this.param);
+                }
+            },
+            "template": `
+<a-layout>
+    <a-layout-header style="background-color:#fff;position:fixed;width:100%;height:64px;z-index:1;top:0;border-bottom:1px #ccc solid;">
+        <a-input-search placeholder="搜索线路" @search="search" />
+    </a-layout-header>
+    <a-layout-content style="background-color:#fff;z-index:0;padding-top:64px;padding-bottom:64px;">
+        <a-list :data-source="lines" v-show="display == 'lines'">
+            <template #renderItem="{ item }">
+                <a-list-item @click="setBusLine(item)" style="cursor:pointer;">
+                    <a-list-item-meta style="margin:10px;" :description="item.startSn + ' -- ' + item.endSn + '路'">
+                        <template #title><a>{{ item.name }}</a></template>
+                        <template #avatar><a-avatar src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC" /></template>
+                    </a-list-item-meta>
+                </a-list-item>
+            </template>
+        </a-list>
+        <a-row>
+            <a-col :span="4"></a-col>
+            <a-col :span="12">
+                <a-timeline v-show="display == 'stations'" style="margin-top:30px;margin-bottom:30px;">
+                    <a-timeline-item v-for="(station, index) in stations" :color="index == targetOrder ? 'green' : 'blue'">
+                        <p @click="setOrder(index)" style="cursor: pointer;">{{station.sn}}</p>
+                        <span v-for="(bus) in buses">
+                            <p v-if="bus.travels.length != 0 && bus.order <= index + 1 && targetOrder - 1 == index">
+                                <a-card hoverable>
+                                    <a-card-meta>
+                                        <template #title>
+                                            {{ formatTravels(bus.travels) }}
+                                            <a-tag color="green" v-if="bus.busDesc.length != 0">{{ bus.busDesc }}</a-tag>
+                                        </template>
+                                        <template #description>
+                                            {{ targetOrder - bus.order + '站' }}/{{ formatDistance(bus.distanceToWaitStn) }}
+                                        </template>
+                                    </a-card-meta>
+                                </a-card>
+                            </p>
+                        </span>
+                        <span v-for="(bus) in buses">
+                            <p v-if="bus.order == index + 1">
+                                <i class="fa fa-bus"></i>
+                            </p>
+                        </span>
+                    </a-timeline-item>
+                </a-timeline>
+            </a-col>
+            <a-col :span="4"></a-col>
+        </a-row>
+    </a-layout-content>
+    <a-layout-footer style="background-color:#fff;position:fixed;width:100%;height:64px;z-index:1;bottom:0;text-align:center;border-top:1px #ccc solid;">
+        <a-row>
+            <a-col :span="8" @click="refresh" style="cursor:pointer;"><i class="fa fa-star-o"></i></a-col>
+            <a-col :span="8" @click="reverse" style="cursor:pointer;"><i class="fa fa-exchange"></i></a-col>
+            <a-col :span="8" @click="refresh" style="cursor:pointer;"><i class="fa fa-refresh"></i></a-col>
+        </a-row>
+    </a-layout-footer>
+</a-layout>
+            `,
+        });
+        app.use(antd.Avatar);
+        app.use(antd.Badge);
+        app.use(antd.Button);
+        app.use(antd.Card);
+        app.use(antd.Col);
+        app.use(antd.Form);
+        app.use(antd.Input);
+        app.use(antd.Layout);
+        app.use(antd.List);
+        app.use(antd.Row);
+        app.use(antd.Tag);
+        app.use(antd.Timeline);
+        app.mount('#container');
+    </script>
+</body>
+
+</html>
